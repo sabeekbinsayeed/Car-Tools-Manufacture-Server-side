@@ -30,6 +30,7 @@ async function run() {
     try {
         await client.connect();
         const toolsCollection = client.db("manufacturer").collection("tools");
+        const purchaseCollection = client.db("manufacturer").collection("purchase");
 
         app.get('/tools', async (req, res) => {
             const query = {};
@@ -47,10 +48,10 @@ async function run() {
         });
 
 
-        app.post('/service', async (req, res) => {
+        app.post('/purchase', async (req, res) => {
 
-            const newService = req.body;
-            const result = await serviceCollection.insertOne(newService);
+            const newPurchase = req.body;
+            const result = await purchaseCollection.insertOne(newPurchase);
             res.send({ result: "sucess" })
             console.log(`A document was inserted with the _id: ${result.insertedId}`);
 
