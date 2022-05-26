@@ -159,12 +159,13 @@ async function run() {
             res.send(order);
         })
 
-        app.delete('/purchase/:email', async (req, res) => {
-            const email = req.params.email;
-            const filter = { email: email };
-            const result = await purchaseCollection.deleteOne(filter);
+        app.delete('/purchase/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) };
+            const result = await purchaseCollection.deleteOne(query);
             res.send(result);
         })
+
 
         app.get('/order', async (req, res) => {
             console.log(req.query.email)
@@ -216,6 +217,7 @@ async function run() {
             const result = await serviceCollection.deleteOne(query);
             res.send(result);
         })
+
 
         app.get('/purchase/:id', async (req, res) => {
             const id = req.params.id;
