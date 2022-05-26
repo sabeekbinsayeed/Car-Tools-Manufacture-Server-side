@@ -16,7 +16,7 @@ app.get('/', (req, res) => {
 })
 
 app.listen(port, () => {
-    console.log('listen hosce')
+    console.log('listen hosce successfully')
 })
 
 
@@ -52,6 +52,7 @@ async function run() {
         const paymentCollection = client.db("manufacturer").collection("payment");
         const reviewCollection = client.db("manufacturer").collection("review");
         const userCollection = client.db("manufacturer").collection("user");
+        const profileCollection = client.db("manufacturer").collection("profileCollection");
         const verifyAdmin = async (req, res, next) => {
             const requester = req.decoded.email;
             const requesterAccount = await userCollection.findOne({ email: requester });
@@ -79,8 +80,70 @@ async function run() {
             res.send(tool);
         });
 
+        app.post('/tools', async (req, res) => {
 
-        app.post('/purchase', async (req, res) => {
+            const newtool = req.body;
+            const result = await toolsCollection.insertOne(newtool);
+            res.send({ result: "sucess" })
+            console.log(`A document was inserted with the _id: ${result.insertedId}`);
+
+        })
+
+
+        // app.delete('/tool/:_id', async (req, res) => {
+        //     const _id = req.params._id;
+        //     const filter = { _id: _id };
+        //     const result = await toolsCollection.deleteOne(filter);
+        //     res.send(result);
+        // })
+        app.delete('/tool/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) };
+            const result = await toolsCollection.deleteOne(query);
+            res.send(result);
+        })
+        app.post('/profile', async (req, res) => {
+
+            const newuser = req.body;
+            const result = await profileCollection.insertOne(newuser);
+            res.send({ result: "sucess" })
+            console.log(`A document was inserted with the _id: ${result.insertedId}`);
+
+        })
+        app.patch('/profile/:id', verifyJWT, async (req, res) => {
+            const id = req.params.id;
+            const payment = req.body;
+            const filter = { _id: ObjectId(id) };
+            const updatedDoc = {
+                $set: {
+                    location: payment.location,
+                    phone: payment.phone,
+                    education: payment.education
+                }
+            }
+
+            // const result = await paymentCollection.insertOne(payment);
+            const updatedResult = await profileCollection.updateOne(filter, updatedDoc);
+            res.send(updatedResult);
+        })
+
+        app.get('/profile', async (req, res) => {
+            console.log(req.query.email)
+            // const authorization = req.headers.authorization;
+            // console.log(authorization)
+
+            const email = req.query.email;
+            console.log(email, 'profile')
+            const query = { email: email };
+            const profile = await profileCollection.find(query).toArray();
+            res.send(profile);
+
+
+
+        })
+
+
+        app.post('/purchase/', async (req, res) => {
 
             const newPurchase = req.body;
             const result = await purchaseCollection.insertOne(newPurchase);
@@ -103,26 +166,28 @@ async function run() {
             res.send(result);
         })
 
-        app.get('/order', verifyJWT, async (req, res) => {
+        app.get('/order', async (req, res) => {
             console.log(req.query.email)
-            const authorization = req.headers.authorization;
-            console.log(authorization)
+            // const authorization = req.headers.authorization;
+            // console.log(authorization)
 
             const email = req.query.email;
-
+            const query = { email: email };
+            const purchases = await purchaseCollection.find(query).toArray();
+            return res.send(purchases);
             // const query = { email: email };
             // const purchases = await purchaseCollection.find(query).toArray();
             // return res.send(purchases);
 
-            const decodedEmail = req.decoded.email;
-            if (email === decodedEmail) {
-                const query = { email: email };
-                const purchases = await purchaseCollection.find(query).toArray();
-                return res.send(purchases);
-            }
-            else {
-                return res.status(403).send({ message: 'forbidden access' });
-            }
+            // const decodedEmail = req.decoded.email;
+            // if (email === decodedEmail) {
+            //     const query = { email: email };
+            //     const purchases = await purchaseCollection.find(query).toArray();
+            //     return res.send(purchases);
+            // }
+            // else {
+            //     return res.status(403).send({ message: 'forbidden access' });
+            // }
 
 
         })
@@ -189,7 +254,7 @@ async function run() {
                 payment_method_types: ['card']
             });
             res.send({ clientSecret: paymentIntent.client_secret })
-            res.send('done')
+
         });
 
 
@@ -197,6 +262,26 @@ async function run() {
             const users = await userCollection.find().toArray();
             res.send(users);
         });
+
+        // app.patch('/user/:id', verifyJWT, async (req, res) => {
+        //     const id = req.params.id;
+        //     const user = req.body;
+        //     const filter = { _id: ObjectId(id) };
+        //     const updatedDoc = {
+        //         $set: {
+        //             education: user.education,
+        //             location: user.location,
+        //             phone: user.phone,
+        //             linkedin: user.linkedin,
+
+        //             transactionId: payment.transactionId
+        //         }
+        //     }
+
+        //     //const result = await userCollection.insertOne(user);
+        //     const updatedResult = await userCollection.updateOne(filter, updatedDoc);
+        //     res.send(updatedResult);
+        // })
 
 
         app.put('/user/admin/:email', verifyJWT, verifyAdmin, async (req, res) => {
