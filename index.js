@@ -62,7 +62,7 @@ async function run() {
             }
             else {
                 res.status(403).send({ message: 'forbidden' });
-                console.log('admin e error hosce solve')
+                console.log('admin e error hosce solved')
             }
         }
         app.get('/tools', async (req, res) => {
