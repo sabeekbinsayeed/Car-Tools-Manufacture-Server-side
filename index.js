@@ -85,7 +85,7 @@ async function run() {
             const newtool = req.body;
             const result = await toolsCollection.insertOne(newtool);
             res.send({ result: "sucess" })
-            console.log(`A document was inserted with the _id: ${result.insertedId}`);
+            console.log(`A document was inserted again with the _id: ${result.insertedId}`);
 
         })
 
