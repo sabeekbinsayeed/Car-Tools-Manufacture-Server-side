@@ -258,9 +258,18 @@ async function run() {
         });
 
 
-        app.get('/user', verifyJWT, async (req, res) => {
-            const users = await userCollection.find().toArray();
-            res.send(users);
+        // app.get('/user', async (req, res) => {
+
+        //     const users = await userCollection.find().toArray();
+        //     console.log('problem ki', users)
+        //     res.send(users);
+        // });
+
+        app.get('/user', async (req, res) => {
+            const query = {};
+            const cursor = userCollection.find(query);
+            const result = await cursor.toArray();
+            res.send(result);
         });
 
         // app.patch('/user/:id', verifyJWT, async (req, res) => {
